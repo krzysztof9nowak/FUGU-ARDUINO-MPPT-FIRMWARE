@@ -9,10 +9,10 @@ void System_Processes(){
   ///////////////// FAN COOLING /////////////////
   if(enableFan==true){
     if(enableDynamicCooling==false){                                   //STATIC PWM COOLING MODE (2-PIN FAN - no need for hysteresis, temp data only refreshes after 'avgCountTS' or every 500 loop cycles)                       
-      if(overrideFan==true){fanStatus=true;}                           //Force on fan
-      else if(temperature>=temperatureFan){fanStatus=1;}               //Turn on fan when set fan temp reached
-      else if(temperature<temperatureFan){fanStatus=0;}                //Turn off fan when set fan temp reached
-      digitalWrite(FAN,fanStatus);                                     //Send a digital signal to the fan MOSFET
+      if(overrideFan==true){fan_enabled=true;}                           //Force on fan
+      else if(temperature>=temperatureFan){fan_enabled=1;}               //Turn on fan when set fan temp reached
+      else if(temperature<temperatureFan){fan_enabled=0;}                //Turn off fan when set fan temp reached
+      digitalWrite(FAN,fan_enabled);                                     //Send a digital signal to the fan MOSFET
     }
     else{}                                                             //DYNAMIC PWM COOLING MODE (3-PIN FAN - coming soon)
   }
@@ -55,8 +55,8 @@ void factoryReset(){
 }
 
 void loadSettings(){ 
-  MPPT_Mode          = EEPROM.read(0);                       // Load saved charging mode setting
-  output_Mode        = EEPROM.read(12);                      // Load saved charging mode setting
+  MPPT_mode          = EEPROM.read(0);                       // Load saved charging mode setting
+  output_mode        = EEPROM.read(12);                      // Load saved charging mode setting
   voltageBatteryMax  = EEPROM.read(1)+(EEPROM.read(2)*.01);  // Load saved maximum battery voltage setting
   voltageBatteryMin  = EEPROM.read(3)+(EEPROM.read(4)*.01);  // Load saved minimum battery voltage setting
   currentCharging    = EEPROM.read(5)+(EEPROM.read(6)*.01);  // Load saved charging current setting
@@ -69,8 +69,8 @@ void loadSettings(){
 }
 
 void saveSettings(){
-  EEPROM.write(0,MPPT_Mode);           //STORE: Algorithm 
-  EEPROM.write(12,output_Mode);        //STORE: Charge/PSU Mode Selection 
+  EEPROM.write(0,MPPT_mode);           //STORE: Algorithm 
+  EEPROM.write(12,output_mode);        //STORE: Charge/PSU Mode Selection 
   conv1 = voltageBatteryMax*100;       //STORE: Maximum Battery Voltage (gets whole number)
   conv2 = conv1%100;                   //STORE: Maximum Battery Voltage (gets decimal number and converts to a whole number)
   EEPROM.write(1,voltageBatteryMax);

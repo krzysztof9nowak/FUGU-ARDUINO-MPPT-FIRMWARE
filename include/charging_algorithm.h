@@ -1,7 +1,7 @@
 #pragma once
 
-void buck_Enable();
-void buck_Disable();
+void buck_enable();
+void buck_disable();
 void predictivePWM();
 
 void PWM_Modulation();

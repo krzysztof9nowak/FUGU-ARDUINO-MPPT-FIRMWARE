@@ -5,12 +5,12 @@
 
 
 void backflowControl(){                                                //PV BACKFLOW CONTROL (INPUT MOSFET) 
-  if(output_Mode==0){bypassEnable=1;}                                  //PSU MODE: Force backflow MOSFET on
+  if(output_mode==0){bypass_enabled=1;}                                  //PSU MODE: Force backflow MOSFET on
   else{                                                                //CHARGER MODE: Force backflow MOSFET on
-    if(voltageInput>voltageOutput+voltageDropout){bypassEnable=1;}     //CHARGER MODE: Normal Condition - Turn on Backflow MOSFET (on by default when not in MPPT charger mode)
-    else{bypassEnable=0;}                                              //CHARGER MODE: Input Undervoltage - Turn off bypass MOSFET and prevent PV Backflow (SS)
+    if(voltageInput>voltageOutput+voltageDropout){bypass_enabled=1;}     //CHARGER MODE: Normal Condition - Turn on Backflow MOSFET (on by default when not in MPPT charger mode)
+    else{bypass_enabled=0;}                                              //CHARGER MODE: Input Undervoltage - Turn off bypass MOSFET and prevent PV Backflow (SS)
   }
-  digitalWrite(backflow_MOSFET,bypassEnable);                          //Signal backflow MOSFET GPIO pin   
+  digitalWrite(backflow_MOSFET,bypass_enabled);                          //Signal backflow MOSFET GPIO pin   
 }
 
 void Device_Protection(){
@@ -30,7 +30,7 @@ void Device_Protection(){
   if(voltageOutput>voltageBatteryMax+voltageBatteryThresh) {OOV=1;ERR++;errorCount++;}else{OOV=0;}  //OOV - OUTPUT OVERVOLTAGE: Output voltage has reached absolute limit                     
   if(voltageInput<vInSystemMin&&voltageOutput<vInSystemMin){FLV=1;ERR++;errorCount++;}else{FLV=0;}  //FLV - Fatally low system voltage (unable to resume operation)
 
-  if(output_Mode==0){                                                                               //PSU MODE specific protection protocol
+  if(output_mode==0){                                                                               //PSU MODE specific protection protocol
     REC = 0; BNC = 0;                                                                               //Clear recovery and battery not connected boolean identifiers
     if(voltageInput<voltageBatteryMax+voltageDropout){IUV=1;ERR++;errorCount++;}else{IUV=0;}        //IUV - INPUT UNDERVOLTAGE: Input voltage is below battery voltage (for psu mode only)                     
   }

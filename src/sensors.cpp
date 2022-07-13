@@ -6,8 +6,7 @@
 
 extern Adafruit_ADS1015 ads;               //SYSTEM PARAMETER  - ADS1015 ADC Library (By: Adafruit) Kindly delete this line if you are using ADS1115
 
-
-void ADC_SetGain(){
+void adc_set_gain(){
   if(ADS1015_Mode==true){                                                    //FOR ADS1015 12-BIT ADC MODEL
     if(ADC_GainSelect==0){ads.setGain(GAIN_TWOTHIRDS);ADC_BitReso=3.0000;}   // Gain: 2/3x  Range: +/- 6.144V  
     else if(ADC_GainSelect==1){ads.setGain(GAIN_ONE);ADC_BitReso=2.0000;}    // Gain: 1x    Range: +/- 4.096V    
@@ -19,6 +18,7 @@ void ADC_SetGain(){
     else if(ADC_GainSelect==2){ads.setGain(GAIN_TWO);ADC_BitReso= 0.0625;}   // Gain: 2x    Range: +/- 2.048V    
   }
 }
+
 void resetVariables(){
   secondsElapsed = 0;
   energySavings  = 0; 
@@ -69,7 +69,7 @@ void Read_Sensors(){
   else if(voltageInput<voltageOutput)    {inputSource=2;}  //System is running on batteries as power source
   
   //////// AUTOMATIC CURRENT SENSOR CALIBRATION ////////
-  if(buckEnable==0 && FLV==0 && OOV == 0){                
+  if(buck_enabled==0 && FLV==0 && OOV == 0){                
     currentMidPoint = ((CSI/avgCountCS)*1.3300)-0.003;
   }
   

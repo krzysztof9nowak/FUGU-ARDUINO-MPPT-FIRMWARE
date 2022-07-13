@@ -1,31 +1,14 @@
 #pragma once
-#include <Arduino.h>
 
-
-extern String 
-firmwareInfo      ,
-firmwareDate      ,
-firmwareContactR1 ,  
-firmwareContactR2 ;  
-
-//========================================= WiFi SSID ==============================================//
-// This MPPT firmware uses the Blynk phone app and arduino library for controls and data telemetry  //
-// Fill in your WiFi SSID and password. You will also have to get your own authentication token     //
-// from email after registering from the Blynk platform.                                            //
-//==================================================================================================//
 extern char 
 auth[],   //   USER PARAMETER - Input Blynk Authentication Token (From email after registration)
 ssid[],                   //   USER PARAMETER - Enter Your WiFi SSID
 pass[];               //   USER PARAMETER - Enter Your WiFi Password
 
-//====================================== USER PARAMETERS ==========================================//
-// The parameters below are the default parameters used when the MPPT charger settings have not    //
-// been set or saved through the LCD menu interface or mobile phone WiFi app. Some parameters here //
-// would allow you to override or unlock features for advanced users (settings not on the LCD menu)//
-//=================================================================================================//
+
 extern bool                                  
-MPPT_Mode               ,           //   USER PARAMETER - Enable MPPT algorithm, when disabled charger uses CC-CV algorithm 
-output_Mode             ,           //   USER PARAMETER - 0 = PSU MODE, 1 = Charger Mode  
+MPPT_mode               ,           //   USER PARAMETER - Enable MPPT algorithm, when disabled charger uses CC-CV algorithm 
+output_mode             ,           //   USER PARAMETER - 0 = PSU MODE, 1 = Charger Mode  
 disableFlashAutoLoad    ,           //   USER PARAMETER - Forces the MPPT to not use flash saved settings, enabling this "1" defaults to programmed firmware settings.
 enablePPWM              ,           //   USER PARAMETER - Enables Predictive PWM, this accelerates regulation speed (only applicable for battery charging application)
 enableWiFi              ,           //   USER PARAMETER - Enable WiFi Connection
@@ -95,9 +78,9 @@ vInSystemMin            ;     //  CALIB PARAMETER -
 // you can access these variables to acquire data needed for your mods.                            //
 //=================================================================================================//
 extern bool
-buckEnable            ,           // SYSTEM PARAMETER - Buck Enable Status
-fanStatus             ,           // SYSTEM PARAMETER - Fan activity status (1 = On, 0 = Off)
-bypassEnable          ,           // SYSTEM PARAMETER - 
+buck_enabled            ,           // SYSTEM PARAMETER - Buck Enable Status
+fan_enabled             ,           // SYSTEM PARAMETER - Fan activity status (1 = On, 0 = Off)
+bypass_enabled          ,           // SYSTEM PARAMETER - 
 chargingPause         ,           // SYSTEM PARAMETER - 
 lowPowerMode          ,           // SYSTEM PARAMETER - 
 buttonRightStatus     ,           // SYSTEM PARAMETER -
