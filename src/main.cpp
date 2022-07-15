@@ -43,7 +43,7 @@ Adafruit_ADS1115 ads;             //SYSTEM PARAMETER  - ADS1115 ADC Library (By:
 // from email after registering from the Blynk platform.                                            //
 //==================================================================================================//
 char 
-ssid[] = "Charger",                   //   USER PARAMETER - Enter Your WiFi SSID
+ssid[] = "kN",                   //   USER PARAMETER - Enter Your WiFi SSID
 pass[] = "12345678";               //   USER PARAMETER - Enter Your WiFi Password
 
 
@@ -223,9 +223,15 @@ void setup() {
   buck_disable();
 
   // connect to WiFi
-  WiFi.softAP(ssid, pass);
-  IPAddress IP = WiFi.softAPIP();
-  ESP_LOGI(TAG, "Started WiFi AP with SSID: %s and IP: %s", ssid, IP.toString().c_str());
+  WiFi.begin(ssid, pass);
+  while(WiFi.status() != WL_CONNECTED){
+    delay(500);
+    printf(".");
+  }
+  printf("\n");
+
+  IPAddress IP = WiFi.localIP();
+  ESP_LOGI(TAG, "Connected to WiFi with IP: %s", IP.toString().c_str());
 }
 
 void loop(void *ptr) {

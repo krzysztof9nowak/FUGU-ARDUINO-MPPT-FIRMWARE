@@ -3,80 +3,59 @@
 
 
 
-/* Our URI handler function to be called during GET /uri request */
-esp_err_t get_handler(httpd_req_t *req)
+
+
+esp_err_t index_handler(httpd_req_t *req)
 {
-    /* Send a simple response */
     const char resp[] = "URI GET Response";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
 }
 
-/* Our URI handler function to be called during POST /uri request */
-esp_err_t post_handler(httpd_req_t *req)
+
+#define JSON_BEGIN(ptr) *(ptr++) = '{'
+#define JSON_END(ptr) *(ptr++) = '}'; *(ptr++) = '\0'
+#define JSON_INT(ptr, name, val) ptr += sprintf(ptr, "\"%s\":%d", name, val)
+#define JSON_FLOAT(ptr, name, val, prec) ptr += sprintf(ptr, "\"%s\":%." #prec "f", name, val)
+#define JSON_COMMA(ptr) *(ptr++) = ','
+esp_err_t status_handler(httpd_req_t *req)
 {
-    /* Destination buffer for content of HTTP POST request.
-        * httpd_req_recv() accepts char* only, but content could
-        * as well be any binary data (needs type casting).
-        * In case of string data, null termination will be absent, and
-        * content length would give length of string */
-    char content[100];
+    char resp[2048] = "";
+    char *ptr = resp;
 
-    /* Truncate if content length larger than the buffer */
-    size_t recv_size = req->content_len;
-    if(recv_size > sizeof(content)) recv_size = sizeof(content);
+    JSON_BEGIN(ptr);
+    JSON_INT(ptr, "Hello", 123); JSON_COMMA(ptr);
+    JSON_FLOAT(ptr, "time", 45.1234567, 3);
+    JSON_END(ptr);
 
-    int ret = httpd_req_recv(req, content, recv_size);
-    if (ret <= 0) {  /* 0 return value indicates connection closed */
-        /* Check if timeout occurred */
-        if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
-            /* In case of timeout one can choose to retry calling
-                * httpd_req_recv(), but to keep it simple, here we
-                * respond with an HTTP 408 (Request Timeout) error */
-            httpd_resp_send_408(req);
-        }
-        /* In case of error, returning ESP_FAIL will
-            * ensure that the underlying socket is closed */
-        return ESP_FAIL;
-    }
-
-    /* Send a simple response */
-    const char resp[] = "URI POST Response";
+    httpd_resp_set_type(req, "application/json");
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
 }
 
-/* URI handler structure for GET /uri */
-httpd_uri_t uri_get = {
-    .uri      = "/uri",
+httpd_uri_t uri_index = {
+    .uri      = "/",
     .method   = HTTP_GET,
-    .handler  = get_handler,
+    .handler  = index_handler,
     .user_ctx = NULL
 };
 
-/* URI handler structure for POST /uri */
-httpd_uri_t uri_post = {
-    .uri      = "/uri",
-    .method   = HTTP_POST,
-    .handler  = post_handler,
+httpd_uri_t uri_status = {
+    .uri      = "/status",
+    .method   = HTTP_GET,
+    .handler  = status_handler,
     .user_ctx = NULL
 };
 
-/* Function for starting the webserver */
 httpd_handle_t start_webserver(void)
 {
-    /* Generate default configuration */
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-
-    /* Empty handle to esp_http_server */
     httpd_handle_t server = NULL;
 
-    /* Start the httpd server */
     if (httpd_start(&server, &config) == ESP_OK) {
-        /* Register URI handlers */
-        httpd_register_uri_handler(server, &uri_get);
-        httpd_register_uri_handler(server, &uri_post);
+        httpd_register_uri_handler(server, &uri_index);
+        httpd_register_uri_handler(server, &uri_status);
     }
-    /* If server failed to start, handle will be NULL */
+
     return server;
 }
