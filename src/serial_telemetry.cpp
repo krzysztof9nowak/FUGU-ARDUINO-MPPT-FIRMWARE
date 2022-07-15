@@ -58,7 +58,6 @@ void telemetry_task(void *) {
       SSHOW_INT("FAN", fan_enabled);
       SSHOW_INT("SOC", batteryPercent);
       SSHOW_INT("T", (int)secondsElapsed);
-      printf("ms ");
       printf("\n\n");
     }
     delay(millisSerialInterval);

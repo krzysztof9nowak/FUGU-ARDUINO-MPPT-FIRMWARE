@@ -5,14 +5,13 @@
     <title>MPPT charge controller</title>
     <script>
       setInterval(() => getStatus(), 2000);
+      getStatus();
 
       function getStatus() {
         var statusRequest = new XMLHttpRequest();
         statusRequest.onreadystatechange = function () {
-          console.log("Callback");
           if (this.readyState == 4 && this.status == 200) {
             var obj = JSON.parse(this.responseText);
-            console.log(obj);
             for(const key of ["power", "voltageInput", "voltageOutput", "currentInput", "currentOutput"]){
                 document.getElementById(key).innerHTML = obj[key];
             }
@@ -95,12 +94,12 @@
       </div>
     </div>
 
-    <form action="" method="post">
-        <button name="action" value="stop" id="stop">Stop</button>
+    <form action="" method="post" style="display: none;" id="stop">
+        <button name="action" value="stop">Stop</button>
     </form>
 
-    <form action="" method="post">
-        <button name="action" value="start" id="start">Start</button>
+    <form action="" method="post" style="display: none;" id="start">
+        <button name="action" value="start">Start</button>
     </form>
     
   </body>
