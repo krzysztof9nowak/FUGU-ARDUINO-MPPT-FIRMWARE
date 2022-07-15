@@ -13,16 +13,7 @@ void telemetry_task(void *) {
   while (true) {
     if (serialTelemMode == 1) { // 1 - Display All
       printf("---\n");
-      SHOW_INT(ERR);
-      SHOW_INT(FLV);
-      SHOW_INT(BNC);
-      SHOW_INT(IUV);
-      SHOW_INT(IOC);
-      SHOW_INT(IOC);
-      SHOW_INT(OOV);
-      SHOW_INT(OOC);
-      SHOW_INT(OTE);
-      SHOW_INT(REC);
+      SHOW_INT((int)err);
       SHOW_INT(MPPT_mode);
       SHOW_INT(output_mode);
       printf("\n");
@@ -50,9 +41,6 @@ void telemetry_task(void *) {
       SSHOW_FLOAT("VO Dev", outputDeviation, 1);
       SSHOW_INT("SOC", batteryPercent);
       SSHOW_INT("T", (int)secondsElapsed);
-      SSHOW_FLOAT("LoopT", loopTime, 3);
-      printf("ms ");
-
       printf("\n\n");
     } else if (serialTelemMode == 2) { // 2 - Display Essential Data
       printf("---\n");
@@ -70,7 +58,6 @@ void telemetry_task(void *) {
       SSHOW_INT("FAN", fan_enabled);
       SSHOW_INT("SOC", batteryPercent);
       SSHOW_INT("T", (int)secondsElapsed);
-      SSHOW_FLOAT("LoopT", loopTime, 3);
       printf("ms ");
       printf("\n\n");
     }

@@ -1,17 +1,12 @@
 #include <webserver.h>
 #include <variables.h>
-
-
-
-
+#include <webpage_index.h>
 
 esp_err_t index_handler(httpd_req_t *req)
 {
-    const char resp[] = "URI GET Response";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    httpd_resp_send(req, (char*)pages_webpage_index_html, pages_webpage_index_html_len);
     return ESP_OK;
 }
-
 
 #define JSON_BEGIN(ptr) *(ptr++) = '{'
 #define JSON_END(ptr) *(ptr++) = '}'; *(ptr++) = '\0'
@@ -24,8 +19,14 @@ esp_err_t status_handler(httpd_req_t *req)
     char *ptr = resp;
 
     JSON_BEGIN(ptr);
-    JSON_INT(ptr, "Hello", 123); JSON_COMMA(ptr);
-    JSON_FLOAT(ptr, "time", 45.1234567, 3);
+    JSON_INT(ptr, "err", (int)err); JSON_COMMA(ptr);
+    JSON_FLOAT(ptr, "power", powerInput, 1); JSON_COMMA(ptr);
+    JSON_FLOAT(ptr, "voltageInput", voltageInput, 1); JSON_COMMA(ptr);
+    JSON_FLOAT(ptr, "voltageOutput", voltageOutput, 1); JSON_COMMA(ptr);
+    JSON_FLOAT(ptr, "currentInput", currentInput, 1); JSON_COMMA(ptr);
+    JSON_FLOAT(ptr, "currentOutput", currentOutput, 1); JSON_COMMA(ptr);
+    JSON_FLOAT(ptr, "energy", energy_wh, 1); JSON_COMMA(ptr);
+    JSON_INT(ptr, "temperature", temperature);
     JSON_END(ptr);
 
     httpd_resp_set_type(req, "application/json");

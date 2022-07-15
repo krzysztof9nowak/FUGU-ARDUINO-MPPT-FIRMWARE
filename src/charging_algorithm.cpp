@@ -7,7 +7,6 @@
 
 static const char* TAG = "charging";
 
-
 void buck_enable(){                                                                  //Enable MPPT Buck Converter
   buck_enabled = 1;
   digitalWrite(buck_EN,HIGH);
@@ -36,17 +35,16 @@ void PWM_Modulation(){
 }
      
 void Charging_Algorithm(){
-  if(ERR>0||chargingPause==1){buck_disable();}                                       //ERROR PRESENT  - Turn off MPPT buck when error is present or when chargingPause is used for a pause override
+  if(err != mppt_error::OK || chargingPause==1){buck_disable();}                                       //ERROR PRESENT  - Turn off MPPT buck when error is present or when chargingPause is used for a pause override
   else{
-    if(REC==1){                                                                      //IUV RECOVERY - (Only active for charging mode)
-      REC=0;                                                                         //Reset IUV recovery boolean identifier 
+    if(PWM == 0 && false){
       buck_disable();                                                                //Disable buck before PPWM initialization
       ESP_LOGI(TAG, "Solar panel detected");
-      delay(1200);
+      delay(1000);
 
       Read_Sensors();
       predictivePWM();
-      PWM = PPWM; 
+      PWM = PPWM;
     }  
     else{                                                                            //NO ERROR PRESENT  - Continue power conversion              
       int step_size = 10;
@@ -55,8 +53,6 @@ void Charging_Algorithm(){
         if(currentOutput>currentCharging)       {PWM-=step_size;}                             //Current Is Above → Decrease Duty Cycle
         else if(voltageOutput>voltageBatteryMax){PWM-=step_size;}                             //Voltage Is Above → Decrease Duty Cycle   
         else if(voltageOutput<voltageBatteryMax){PWM+=step_size;}                             //Increase duty cycle when output is below charging voltage (for CC-CV only mode)
-        else{}                                                                       //Do nothing when set output voltage is reached 
-        PWM_Modulation();                                                            //Set PWM signal to Buck PWM GPIO       
       }     
         /////////////////////// MPPT & CC-CV CHARGING ALGORITHM ///////////////////////  
       else{                                                                                                                                                         
@@ -71,8 +67,8 @@ void Charging_Algorithm(){
           powerInputPrev   = powerInput;                                               //Store Previous Recorded Power
           voltageInputPrev = voltageInput;                                             //Store Previous Recorded Voltage        
         }   
-        PWM_Modulation();                                                              //Set PWM signal to Buck PWM GPIO                                                                       
-      }  
+      }
+      PWM_Modulation();                                                              //Set PWM signal to Buck PWM GPIO                                                                       
     }
   }
 }

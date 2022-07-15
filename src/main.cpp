@@ -55,16 +55,14 @@ enablePPWM              = 1,           //   USER PARAMETER - Enables Predictive 
 enableWiFi              = 1,           //   USER PARAMETER - Enable WiFi Connection
 enableFan               = 1,           //   USER PARAMETER - Enable Cooling Fan
 enableBluetooth         = 1,           //   USER PARAMETER - Enable Bluetooth Connection
-overrideFan             = 0,           //   USER PARAMETER - Fan always on
-enableDynamicCooling    = 0;           //   USER PARAMETER - Enable for PWM cooling control 
+overrideFan             = 0;           //   USER PARAMETER - Fan always on
+
 int
 serialTelemMode         = 1,           //  USER PARAMETER - Selects serial telemetry data feed (0 - Disable Serial, 1 - Display All Data, 2 - Display Essential, 3 - Number only)
 pwmResolution           = 11,          //  USER PARAMETER - PWM Bit Resolution 
 pwmFrequency            = 39000,       //  USER PARAMETER - PWM Switching Frequency - Hz (For Buck)
 temperatureFan          = 60,          //  USER PARAMETER - Temperature threshold for fan to turn on
 temperatureMax          = 90,          //  USER PARAMETER - Overtemperature, System Shudown When Exceeded (deg C)
-errorTimeLimit          = 1000,        //  USER PARAMETER - Time interval for reseting error counter (milliseconds)  
-errorCountLimit         = 5,           //  USER PARAMETER - Maximum number of errors  
 millisRoutineInterval   = 250,         //  USER PARAMETER - Time Interval Refresh Rate For Routine Functions (ms)
 millisSerialInterval    = 1000,           //  USER PARAMETER - Time Interval Refresh Rate For USB Serial Datafeed (ms)
 millisWiFiInterval      = 2000,        //  USER PARAMETER - Time Interval Refresh Rate For WiFi Telemetry (ms)
@@ -113,7 +111,6 @@ buck_enabled            = 0,           // SYSTEM PARAMETER - Buck Enable Status
 fan_enabled             = 0,           // SYSTEM PARAMETER - Fan activity status (1 = On, 0 = Off)
 bypass_enabled          = 0,           // SYSTEM PARAMETER - 
 chargingPause         = 0,           // SYSTEM PARAMETER - 
-lowPowerMode          = 0,           // SYSTEM PARAMETER - 
 buttonRightStatus     = 0,           // SYSTEM PARAMETER -
 buttonLeftStatus      = 0,           // SYSTEM PARAMETER - 
 buttonBackStatus      = 0,           // SYSTEM PARAMETER - 
@@ -127,17 +124,8 @@ setMenuPage           = 0,           // SYSTEM PARAMETER -
 boolTemp              = 0,           // SYSTEM PARAMETER -
 flashMemLoad          = 0,           // SYSTEM PARAMETER -  
 confirmationMenu      = 0,           // SYSTEM PARAMETER -      
-WIFI                  = 0,           // SYSTEM PARAMETER - 
-BNC                   = 0,           // SYSTEM PARAMETER -  
-REC                   = 0,           // SYSTEM PARAMETER - 
-FLV                   = 0,           // SYSTEM PARAMETER - 
-IUV                   = 0,           // SYSTEM PARAMETER - 
-IOV                   = 0,           // SYSTEM PARAMETER - 
-IOC                   = 0,           // SYSTEM PARAMETER - 
-OUV                   = 0,           // SYSTEM PARAMETER - 
-OOV                   = 0,           // SYSTEM PARAMETER - 
-OOC                   = 0,           // SYSTEM PARAMETER - 
-OTE                   = 0;           // SYSTEM PARAMETER - 
+WIFI                  = 0;           // SYSTEM PARAMETER - 
+
 int
 inputSource           = 0,           // SYSTEM PARAMETER - 0 = MPPT has no power source, 1 = MPPT is using solar as source, 2 = MPPTis using battery as power source
 avgStoreTS            = 0,           // SYSTEM PARAMETER - Temperature Sensor uses non invasive averaging, this is used an accumulator for mean averaging
@@ -149,13 +137,14 @@ PWM                   = 0,           // SYSTEM PARAMETER -
 PPWM                  = 0,           // SYSTEM PARAMETER -
 pwmChannel            = 0,           // SYSTEM PARAMETER -
 batteryPercent        = 0,           // SYSTEM PARAMETER -
-errorCount            = 0,           // SYSTEM PARAMETER -
 menuPage              = 0,           // SYSTEM PARAMETER -
 subMenuPage           = 0,           // SYSTEM PARAMETER -
-ERR                   = 0,           // SYSTEM PARAMETER - 
 conv1                 = 0,           // SYSTEM PARAMETER -
 conv2                 = 0,           // SYSTEM PARAMETER -
 intTemp               = 0;           // SYSTEM PARAMETER -
+
+mppt_error err = mppt_error::OK;
+
 float
 VSI                   = 0.0000,      // SYSTEM PARAMETER - Raw input voltage sensor ADC voltage
 VSO                   = 0.0000,      // SYSTEM PARAMETER - Raw output voltage sensor ADC voltage
@@ -173,7 +162,6 @@ currentOutput         = 0.0000,      // SYSTEM PARAMETER - Output current (batte
 TSlog                 = 0.0000,      // SYSTEM PARAMETER - Part of NTC thermistor thermal sensing code
 ADC_BitReso           = 0.0000,      // SYSTEM PARAMETER - System detects the approriate bit resolution factor for ADS1015/ADS1115 ADC
 energy_wh             = 0.0000,      // SYSTEM PARAMETER - Stores the accumulated energy harvested (Watt-Hours)
-loopTime              = 0.0000,      // SYSTEM PARAMETER -
 outputDeviation       = 0.0000,      // SYSTEM PARAMETER - Output Voltage Deviation (%)
 buckEfficiency        = 0.0000,      // SYSTEM PARAMETER - Measure buck converter power conversion efficiency (only applicable to my dual current sensor version)
 floatTemp             = 0.0000,
@@ -188,8 +176,6 @@ prevButtonMillis      = 0,           //SYSTEM PARAMETER -
 prevRoutineMillis     = 0,           //SYSTEM PARAMETER -
 prevErrorMillis       = 0,           //SYSTEM PARAMETER -
 prevWiFiMillis        = 0,           //SYSTEM PARAMETER -
-loopTimeStart         = 0,           //SYSTEM PARAMETER - Used for the loop cycle stop watch, records the loop start time
-loopTimeEnd           = 0,           //SYSTEM PARAMETER - Used for the loop cycle stop watch, records the loop end time
 secondsElapsed        = 0;           //SYSTEM PARAMETER - 
 
 void setup() { 
@@ -237,7 +223,7 @@ void setup() {
 void loop(void *ptr) {
   while(true){
     Read_Sensors();
-    Device_Protection();
+    err = safety_checks();
     System_Processes();
     Charging_Algorithm();    
     delay(100);

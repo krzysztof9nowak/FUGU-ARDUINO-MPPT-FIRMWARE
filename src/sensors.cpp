@@ -59,7 +59,8 @@ void Read_Sensors(){
   else if(voltageInput<voltageOutput)    {inputSource=2;}  //System is running on batteries as power source
   
   //////// AUTOMATIC CURRENT SENSOR CALIBRATION ////////
-  if(buck_enabled==0 && FLV==0 && OOV == 0){                
+  bool no_errors_for_calibration = (err & (mppt_error::FATALLY_LOW_VOLTAGE | mppt_error::OUTPUT_OVERVOLTAGE)) == mppt_error::OK;
+  if(buck_enabled==0 && no_errors_for_calibration){                 
     currentMidPoint = ((CSI/avgCountCS)*1.3250)-0.003;
   }
   

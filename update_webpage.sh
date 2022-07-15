@@ -1,0 +1,1 @@
+xxd -i pages/webpage_index.html > include/webpage_index.h

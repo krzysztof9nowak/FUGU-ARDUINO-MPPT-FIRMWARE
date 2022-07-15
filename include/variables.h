@@ -1,9 +1,6 @@
 #pragma once
 
-extern char 
-ssid[],                   //   USER PARAMETER - Enter Your WiFi SSID
-pass[];               //   USER PARAMETER - Enter Your WiFi Password
-
+#include <protection.h>
 
 extern bool                                  
 MPPT_mode               ,           //   USER PARAMETER - Enable MPPT algorithm, when disabled charger uses CC-CV algorithm 
@@ -13,16 +10,13 @@ enablePPWM              ,           //   USER PARAMETER - Enables Predictive PWM
 enableWiFi              ,           //   USER PARAMETER - Enable WiFi Connection
 enableFan               ,           //   USER PARAMETER - Enable Cooling Fan
 enableBluetooth         ,           //   USER PARAMETER - Enable Bluetooth Connection
-overrideFan             ,           //   USER PARAMETER - Fan always on
-enableDynamicCooling    ;           //   USER PARAMETER - Enable for PWM cooling control 
+overrideFan             ;           //   USER PARAMETER - Fan always on
 extern int
 serialTelemMode         ,           //  USER PARAMETER - Selects serial telemetry data feed (0 - Disable Serial, 1 - Display All Data, 2 - Display Essential, 3 - Number only)
 pwmResolution           ,          //  USER PARAMETER - PWM Bit Resolution 
 pwmFrequency            ,       //  USER PARAMETER - PWM Switching Frequency - Hz (For Buck)
 temperatureFan          ,          //  USER PARAMETER - Temperature threshold for fan to turn on
 temperatureMax          ,          //  USER PARAMETER - Overtemperature, System Shudown When Exceeded (deg C)
-errorTimeLimit          ,        //  USER PARAMETER - Time interval for reseting error counter (milliseconds)  
-errorCountLimit         ,           //  USER PARAMETER - Maximum number of errors  
 millisRoutineInterval   ,         //  USER PARAMETER - Time Interval Refresh Rate For Routine Functions (ms)
 millisSerialInterval    ,           //  USER PARAMETER - Time Interval Refresh Rate For USB Serial Datafeed (ms)
 millisWiFiInterval      ,        //  USER PARAMETER - Time Interval Refresh Rate For WiFi Telemetry (ms)
@@ -71,7 +65,6 @@ buck_enabled            ,           // SYSTEM PARAMETER - Buck Enable Status
 fan_enabled             ,           // SYSTEM PARAMETER - Fan activity status (1 = On, 0 = Off)
 bypass_enabled          ,           // SYSTEM PARAMETER - 
 chargingPause         ,           // SYSTEM PARAMETER - 
-lowPowerMode          ,           // SYSTEM PARAMETER - 
 buttonRightStatus     ,           // SYSTEM PARAMETER -
 buttonLeftStatus      ,           // SYSTEM PARAMETER - 
 buttonBackStatus      ,           // SYSTEM PARAMETER - 
@@ -85,17 +78,8 @@ setMenuPage           ,           // SYSTEM PARAMETER -
 boolTemp              ,           // SYSTEM PARAMETER -
 flashMemLoad          ,           // SYSTEM PARAMETER -  
 confirmationMenu      ,           // SYSTEM PARAMETER -      
-WIFI                  ,           // SYSTEM PARAMETER - 
-BNC                   ,           // SYSTEM PARAMETER -  
-REC                   ,           // SYSTEM PARAMETER - 
-FLV                   ,           // SYSTEM PARAMETER - 
-IUV                   ,           // SYSTEM PARAMETER - 
-IOV                   ,           // SYSTEM PARAMETER - 
-IOC                   ,           // SYSTEM PARAMETER - 
-OUV                   ,           // SYSTEM PARAMETER - 
-OOV                   ,           // SYSTEM PARAMETER - 
-OOC                   ,           // SYSTEM PARAMETER - 
-OTE                   ;           // SYSTEM PARAMETER - 
+WIFI                  ;           // SYSTEM PARAMETER - 
+
 extern int
 inputSource           ,           // SYSTEM PARAMETER - 0 = MPPT has no power source, 1 = MPPT is using solar as source, 2 = MPPTis using battery as power source
 avgStoreTS            ,           // SYSTEM PARAMETER - Temperature Sensor uses non invasive averaging, this is used an accumulator for mean averaging
@@ -107,13 +91,15 @@ PWM                   ,           // SYSTEM PARAMETER -
 PPWM                  ,           // SYSTEM PARAMETER -
 pwmChannel            ,           // SYSTEM PARAMETER -
 batteryPercent        ,           // SYSTEM PARAMETER -
-errorCount            ,           // SYSTEM PARAMETER -
 menuPage              ,           // SYSTEM PARAMETER -
 subMenuPage           ,           // SYSTEM PARAMETER -
-ERR                   ,           // SYSTEM PARAMETER - 
 conv1                 ,           // SYSTEM PARAMETER -
 conv2                 ,           // SYSTEM PARAMETER -
 intTemp               ;           // SYSTEM PARAMETER -
+
+extern mppt_error err;
+
+
 extern float
 VSI                   ,      // SYSTEM PARAMETER - Raw input voltage sensor ADC voltage
 VSO                   ,      // SYSTEM PARAMETER - Raw output voltage sensor ADC voltage
@@ -131,7 +117,6 @@ currentOutput         ,      // SYSTEM PARAMETER - Output current (battery or ch
 TSlog                 ,      // SYSTEM PARAMETER - Part of NTC thermistor thermal sensing code
 ADC_BitReso           ,      // SYSTEM PARAMETER - System detects the approriate bit resolution factor for ADS1015/ADS1115 ADC
 energy_wh                    ,      // SYSTEM PARAMETER - Stores the accumulated energy harvested (Watt-Hours)
-loopTime              ,      // SYSTEM PARAMETER -
 outputDeviation       ,      // SYSTEM PARAMETER - Output Voltage Deviation (%)
 buckEfficiency        ,      // SYSTEM PARAMETER - Measure buck converter power conversion efficiency (only applicable to my dual current sensor version)
 floatTemp             ,
@@ -146,6 +131,4 @@ prevButtonMillis      ,           //SYSTEM PARAMETER -
 prevRoutineMillis     ,           //SYSTEM PARAMETER -
 prevErrorMillis       ,           //SYSTEM PARAMETER -
 prevWiFiMillis        ,           //SYSTEM PARAMETER -
-loopTimeStart         ,           //SYSTEM PARAMETER - Used for the loop cycle stop watch, records the loop start time
-loopTimeEnd           ,           //SYSTEM PARAMETER - Used for the loop cycle stop watch, records the loop end time
 secondsElapsed        ;           //SYSTEM PARAMETER - 

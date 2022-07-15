@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pl-PL">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MPPT charge controller</title>
+    <script>
+      setInterval(() => getStatus(), 2000);
+
+      function getStatus() {
+        var statusRequest = new XMLHttpRequest();
+        statusRequest.onreadystatechange = function () {
+          console.log("Callback");
+          if (this.readyState == 4 && this.status == 200) {
+            var obj = JSON.parse(this.responseText);
+            console.log(obj);
+            for(const key of ["power", "voltageInput", "voltageOutput", "currentInput", "currentOutput"]){
+                document.getElementById(key).innerHTML = obj[key];
+            }
+          }
+        };
+        statusRequest.open("GET", "status", true);
+        statusRequest.send();
+      }
+    </script>
+    <style>
+      body {
+        background-color: #ffffff;
+        font-family: Helvetica, sans-serief;
+      }
+      h4 {
+        text-align: center;
+      }
+      .card {
+        background: #f1f1f1; /*388e3c*/
+        padding: 10px;
+        text-align: center;
+        box-sizing: border-box;
+        box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
+      }
+
+      .row {
+        margin: 0 -5px;
+      }
+
+      .row:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+
+      .column {
+        float: left;
+        width: 25%;
+        padding: 0 10px;
+      }
+
+      @media screen and (max-width: 600px) {
+        .column {
+          width: 100%;
+          display: block;
+          margin-bottom: 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="row">
+      <div class="column">
+        <div class="card">
+          Power
+          <h1><span id="power"></span>W</h1>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="card">
+          Input voltage: <span id="voltageInput"></span>V <br />
+          Output voltage: <span id="voltageOutput"></span> V <br />
+          Input current: <span id="currentInput"></span> A <br />
+          Output current: <span id="currentOutput"></span> A <br />
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="card">Errors</div>
+      </div>
+    </div>
+  </body>
+</html>
