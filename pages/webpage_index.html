@@ -16,6 +16,14 @@
             for(const key of ["power", "voltageInput", "voltageOutput", "currentInput", "currentOutput"]){
                 document.getElementById(key).innerHTML = obj[key];
             }
+
+            if(obj["paused"] == 1){
+                document.getElementById("stop").style.display = "none";
+                document.getElementById("start").style.display = "block";
+            } else {
+                document.getElementById("stop").style.display = "block";
+                document.getElementById("start").style.display = "none";
+            }
           }
         };
         statusRequest.open("GET", "status", true);
@@ -86,5 +94,14 @@
         <div class="card">Errors</div>
       </div>
     </div>
+
+    <form action="" method="post">
+        <button name="action" value="stop" id="stop">Stop</button>
+    </form>
+
+    <form action="" method="post">
+        <button name="action" value="start" id="start">Start</button>
+    </form>
+    
   </body>
 </html>

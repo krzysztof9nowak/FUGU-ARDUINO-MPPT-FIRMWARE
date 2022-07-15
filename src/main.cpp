@@ -49,7 +49,7 @@ pass[] = "12345678";               //   USER PARAMETER - Enter Your WiFi Passwor
 
 bool                                  
 MPPT_mode               = 1,           //   USER PARAMETER - Enable MPPT algorithm, when disabled charger uses CC-CV algorithm 
-output_mode             = 0,           //   USER PARAMETER - 0 = PSU MODE, 1 = Charger Mode  
+output_mode             = 1,           //   USER PARAMETER - 0 = PSU MODE, 1 = Charger Mode  
 disableFlashAutoLoad    = 0,           //   USER PARAMETER - Forces the MPPT to not use flash saved settings, enabling this "1" defaults to programmed firmware settings.
 enablePPWM              = 1,           //   USER PARAMETER - Enables Predictive PWM, this accelerates regulation speed (only applicable for battery charging application)
 enableWiFi              = 1,           //   USER PARAMETER - Enable WiFi Connection
@@ -58,18 +58,18 @@ enableBluetooth         = 1,           //   USER PARAMETER - Enable Bluetooth Co
 overrideFan             = 0;           //   USER PARAMETER - Fan always on
 
 int
-serialTelemMode         = 1,           //  USER PARAMETER - Selects serial telemetry data feed (0 - Disable Serial, 1 - Display All Data, 2 - Display Essential, 3 - Number only)
+serialTelemMode         = 2,           //  USER PARAMETER - Selects serial telemetry data feed (0 - Disable Serial, 1 - Display All Data, 2 - Display Essential, 3 - Number only)
 pwmResolution           = 11,          //  USER PARAMETER - PWM Bit Resolution 
 pwmFrequency            = 39000,       //  USER PARAMETER - PWM Switching Frequency - Hz (For Buck)
 temperatureFan          = 60,          //  USER PARAMETER - Temperature threshold for fan to turn on
 temperatureMax          = 90,          //  USER PARAMETER - Overtemperature, System Shudown When Exceeded (deg C)
 millisRoutineInterval   = 250,         //  USER PARAMETER - Time Interval Refresh Rate For Routine Functions (ms)
-millisSerialInterval    = 1000,           //  USER PARAMETER - Time Interval Refresh Rate For USB Serial Datafeed (ms)
+millisSerialInterval    = 5000,           //  USER PARAMETER - Time Interval Refresh Rate For USB Serial Datafeed (ms)
 millisWiFiInterval      = 2000,        //  USER PARAMETER - Time Interval Refresh Rate For WiFi Telemetry (ms)
 backlightSleepMode      = 0;           //  USER PARAMETER - 0 = Never, 1 = 10secs, 2 = 5mins, 3 = 1hr, 4 = 6 hrs, 5 = 12hrs, 6 = 1 day, 7 = 3 days, 8 = 1wk, 9 = 1month
 
 float 
-voltageBatteryMax       = 12.5,     //   USER PARAMETER - Maximum Battery Charging Voltage (Output V)
+voltageBatteryMax       = 14.1,     //   USER PARAMETER - Maximum Battery Charging Voltage (Output V)
 voltageBatteryMin       = 11.0,     //   USER PARAMETER - Minimum Battery Charging Voltage (Output V)
 currentCharging         = 10;     //   USER PARAMETER - Maximum Charging Current (A - Output)
 
