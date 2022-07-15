@@ -9,27 +9,22 @@
 #include <protection.h>
 #include <sensors.h>
 #include <charging_algorithm.h>
+#include <webserver.h>
 
 #include <esp_log.h>
-static const char* TAG = "MAIN";
-           
-//====================== ARDUINO LIBRARIES (ESP32 Compatible Libraries) ============================//
-// You will have to download and install the following libraries below in order to program the MPPT //
-// unit. Visit TechBuilder's YouTube channel for the "MPPT" tutorial.                               //
-//============================================================================================= ====//
+
 #include <Wire.h>                   //SYSTEM PARAMETER  - WIRE Library (By: Arduino)
 #include <SPI.h>                    //SYSTEM PARAMETER  - SPI Library (By: Arduino)
 #include <WiFi.h>                   //SYSTEM PARAMETER  - WiFi Library (By: Arduino)
 #include <WiFiClient.h>             //SYSTEM PARAMETER  - WiFi Library (By: Arduino)
 #include <Adafruit_ADS1X15.h>       //SYSTEM PARAMETER  - ADS1115/ADS1015 ADC Library (By: Adafruit)
-// Adafruit_ADS1015 ads;               //SYSTEM PARAMETER  - ADS1015 ADC Library (By: Adafruit) Kindly delete this line if you are using ADS1115
+
+
+static const char* TAG = "main";
+      
 Adafruit_ADS1115 ads;             //SYSTEM PARAMETER  - ADS1115 ADC Library (By: Adafruit) Kindly uncomment this if you are using ADS1115
 
-//====================================== USER PARAMETERS ===========================================//
-// The parameters below are the default parameters used when the MPPT charger settings have not     //
-// been set or saved through the LCD menu interface or mobile phone WiFi app. Some parameters here  //
-// would allow you to override or unlock features for advanced users (settings not on the LCD menu) //
-//==================================================================================================//
+
 #define backflow_MOSFET 27          //SYSTEM PARAMETER - Backflow MOSFET
 #define buck_IN         33          //SYSTEM PARAMETER - Buck MOSFET Driver PWM Pin
 #define buck_EN         32          //SYSTEM PARAMETER - Buck MOSFET Driver Enable Pin
@@ -48,25 +43,18 @@ Adafruit_ADS1115 ads;             //SYSTEM PARAMETER  - ADS1115 ADC Library (By:
 // from email after registering from the Blynk platform.                                            //
 //==================================================================================================//
 char 
-auth[] = "InputBlynkAuthenticationToken",   //   USER PARAMETER - Input Blynk Authentication Token (From email after registration)
-ssid[] = "InputWiFiSSID",                   //   USER PARAMETER - Enter Your WiFi SSID
-pass[] = "InputWiFiPassword";               //   USER PARAMETER - Enter Your WiFi Password
+ssid[] = "Charger",                   //   USER PARAMETER - Enter Your WiFi SSID
+pass[] = "12345678";               //   USER PARAMETER - Enter Your WiFi Password
 
-//====================================== USER PARAMETERS ==========================================//
-// The parameters below are the default parameters used when the MPPT charger settings have not    //
-// been set or saved through the LCD menu interface or mobile phone WiFi app. Some parameters here //
-// would allow you to override or unlock features for advanced users (settings not on the LCD menu)//
-//=================================================================================================//
+
 bool                                  
 MPPT_mode               = 1,           //   USER PARAMETER - Enable MPPT algorithm, when disabled charger uses CC-CV algorithm 
-output_mode             = 1,           //   USER PARAMETER - 0 = PSU MODE, 1 = Charger Mode  
+output_mode             = 0,           //   USER PARAMETER - 0 = PSU MODE, 1 = Charger Mode  
 disableFlashAutoLoad    = 0,           //   USER PARAMETER - Forces the MPPT to not use flash saved settings, enabling this "1" defaults to programmed firmware settings.
 enablePPWM              = 1,           //   USER PARAMETER - Enables Predictive PWM, this accelerates regulation speed (only applicable for battery charging application)
 enableWiFi              = 1,           //   USER PARAMETER - Enable WiFi Connection
 enableFan               = 1,           //   USER PARAMETER - Enable Cooling Fan
 enableBluetooth         = 1,           //   USER PARAMETER - Enable Bluetooth Connection
-enableLCD               = 0,           //   USER PARAMETER - Enable LCD display
-enableLCDBacklight      = 0,           //   USER PARAMETER - Enable LCD display's backlight
 overrideFan             = 0,           //   USER PARAMETER - Fan always on
 enableDynamicCooling    = 0;           //   USER PARAMETER - Enable for PWM cooling control 
 int
@@ -75,22 +63,17 @@ pwmResolution           = 11,          //  USER PARAMETER - PWM Bit Resolution
 pwmFrequency            = 39000,       //  USER PARAMETER - PWM Switching Frequency - Hz (For Buck)
 temperatureFan          = 60,          //  USER PARAMETER - Temperature threshold for fan to turn on
 temperatureMax          = 90,          //  USER PARAMETER - Overtemperature, System Shudown When Exceeded (deg C)
-telemCounterReset       = 0,           //  USER PARAMETER - Reset Telem Data Every (0 = Never, 1 = Day, 2 = Week, 3 = Month, 4 = Year) 
 errorTimeLimit          = 1000,        //  USER PARAMETER - Time interval for reseting error counter (milliseconds)  
 errorCountLimit         = 5,           //  USER PARAMETER - Maximum number of errors  
 millisRoutineInterval   = 250,         //  USER PARAMETER - Time Interval Refresh Rate For Routine Functions (ms)
-millisSerialInterval    = 1,           //  USER PARAMETER - Time Interval Refresh Rate For USB Serial Datafeed (ms)
-millisLCDInterval       = 1000,        //  USER PARAMETER - Time Interval Refresh Rate For LCD Display (ms)
+millisSerialInterval    = 1000,           //  USER PARAMETER - Time Interval Refresh Rate For USB Serial Datafeed (ms)
 millisWiFiInterval      = 2000,        //  USER PARAMETER - Time Interval Refresh Rate For WiFi Telemetry (ms)
-millisLCDBackLInterval  = 2000,        //  USER PARAMETER - Time Interval Refresh Rate For WiFi Telemetry (ms)
-backlightSleepMode      = 0,           //  USER PARAMETER - 0 = Never, 1 = 10secs, 2 = 5mins, 3 = 1hr, 4 = 6 hrs, 5 = 12hrs, 6 = 1 day, 7 = 3 days, 8 = 1wk, 9 = 1month
-baudRate                = 500000;      //  USER PARAMETER - USB Serial Baud Rate (bps)
+backlightSleepMode      = 0;           //  USER PARAMETER - 0 = Never, 1 = 10secs, 2 = 5mins, 3 = 1hr, 4 = 6 hrs, 5 = 12hrs, 6 = 1 day, 7 = 3 days, 8 = 1wk, 9 = 1month
 
 float 
-voltageBatteryMax       = 27.3000,     //   USER PARAMETER - Maximum Battery Charging Voltage (Output V)
-voltageBatteryMin       = 22.4000,     //   USER PARAMETER - Minimum Battery Charging Voltage (Output V)
-currentCharging         = 30.0000,     //   USER PARAMETER - Maximum Charging Current (A - Output)
-electricalPrice         = 9.5000;      //   USER PARAMETER - Input electrical price per kWh (Dollar/kWh,Euro/kWh,Peso/kWh)
+voltageBatteryMax       = 12.5,     //   USER PARAMETER - Maximum Battery Charging Voltage (Output V)
+voltageBatteryMin       = 11.0,     //   USER PARAMETER - Minimum Battery Charging Voltage (Output V)
+currentCharging         = 10;     //   USER PARAMETER - Maximum Charging Current (A - Output)
 
 
 //================================== CALIBRATION PARAMETERS =======================================//
@@ -98,30 +81,27 @@ electricalPrice         = 9.5000;      //   USER PARAMETER - Input electrical pr
 // the values below if you know what you are doing. The values below have been pre-calibrated for  //
 // MPPT charge controllers designed by TechBuilder (Angelo S. Casimiro)                            //
 //=================================================================================================//
-bool
-ADS1015_Mode            = 0;          //  CALIB PARAMETER - Use 1 for ADS1015 ADC model use 0 for ADS1115 ADC model
 int
 ADC_GainSelect          = 2,          //  CALIB PARAMETER - ADC Gain Selection (0→±6.144V 3mV/bit, 1→±4.096V 2mV/bit, 2→±2.048V 1mV/bit)
 avgCountVS              = 3,          //  CALIB PARAMETER - Voltage Sensor Average Sampling Count (Recommended: 3)
 avgCountCS              = 4,          //  CALIB PARAMETER - Current Sensor Average Sampling Count (Recommended: 4)
 avgCountTS              = 500;        //  CALIB PARAMETER - Temperature Sensor Average Sampling Count
 float
-inVoltageDivRatio       = 40.2156,    //  CALIB PARAMETER - Input voltage divider sensor ratio (change this value to calibrate voltage sensor)
-outVoltageDivRatio      = 24.5000,    //  CALIB PARAMETER - Output voltage divider sensor ratio (change this value to calibrate voltage sensor)
-vOutSystemMax           = 50.0000,    //  CALIB PARAMETER - 
-cOutSystemMax           = 50.0000,    //  CALIB PARAMETER - 
+inVoltageDivRatio       = 47.15,    //  CALIB PARAMETER - Input voltage divider sensor ratio (change this value to calibrate voltage sensor)
+outVoltageDivRatio      = 23,    //  CALIB PARAMETER - Output voltage divider sensor ratio (change this value to calibrate voltage sensor)
+vOutSystemMax           = 14,    //  CALIB PARAMETER - 
+cOutSystemMax           = 10,    //  CALIB PARAMETER - 
 ntcResistance           = 10000.00,   //  CALIB PARAMETER - NTC temp sensor's resistance. Change to 10000.00 if you are using a 10k NTC
 voltageDropout          = 1.0000,     //  CALIB PARAMETER - Buck regulator's dropout voltage (DOV is present due to Max Duty Cycle Limit)
 voltageBatteryThresh    = 1.5000,     //  CALIB PARAMETER - Power cuts-off when this voltage is reached (Output V)
-currentInAbsolute       = 31.0000,    //  CALIB PARAMETER - Maximum Input Current The System Can Handle (A - Input)
-currentOutAbsolute      = 50.0000,    //  CALIB PARAMETER - Maximum Output Current The System Can Handle (A - Input)
+currentInAbsolute       = 10.0,    //  CALIB PARAMETER - Maximum Input Current The System Can Handle (A - Input)
+currentOutAbsolute      = 10.0,    //  CALIB PARAMETER - Maximum Output Current The System Can Handle (A - Input)
 PPWM_margin             = 99.5000,    //  CALIB PARAMETER - Minimum Operating Duty Cycle for Predictive PWM (%)
 PWM_MaxDC               = 97.0000,    //  CALIB PARAMETER - Maximum Operating Duty Cycle (%) 90%-97% is good
 efficiencyRate          = 1.0000,     //  CALIB PARAMETER - Theroretical Buck Efficiency (% decimal)
 currentMidPoint         = 2.5250,     //  CALIB PARAMETER - Current Sensor Midpoint (V)
-currentSens             = 0.0000,     //  CALIB PARAMETER - Current Sensor Sensitivity (V/A)
 currentSensV            = 0.0660,     //  CALIB PARAMETER - Current Sensor Sensitivity (mV/A)
-vInSystemMin            = 10.000;     //  CALIB PARAMETER - 
+vInSystemMin            = 12.000;     //  CALIB PARAMETER - 
 
 //===================================== SYSTEM PARAMETERS =========================================//
 // Do not change parameter values in this section. The values below are variables used by system   //
@@ -185,7 +165,6 @@ TS                    = 0.0000,      // SYSTEM PARAMETER - Raw temperature senso
 powerInput            = 0.0000,      // SYSTEM PARAMETER - Input power (solar power) in Watts
 powerInputPrev        = 0.0000,      // SYSTEM PARAMETER - Previously stored input power variable for MPPT algorithm (Watts)
 powerOutput           = 0.0000,      // SYSTEM PARAMETER - Output power (battery or charing power in Watts)
-energySavings         = 0.0000,      // SYSTEM PARAMETER - Energy savings in fiat currency (Peso, USD, Euros or etc...)
 voltageInput          = 0.0000,      // SYSTEM PARAMETER - Input voltage (solar voltage)
 voltageInputPrev      = 0.0000,      // SYSTEM PARAMETER - Previously stored input voltage variable for MPPT algorithm
 voltageOutput         = 0.0000,      // SYSTEM PARAMETER - Input voltage (battery voltage)
@@ -193,10 +172,7 @@ currentInput          = 0.0000,      // SYSTEM PARAMETER - Output power (battery
 currentOutput         = 0.0000,      // SYSTEM PARAMETER - Output current (battery or charing current in Amperes)
 TSlog                 = 0.0000,      // SYSTEM PARAMETER - Part of NTC thermistor thermal sensing code
 ADC_BitReso           = 0.0000,      // SYSTEM PARAMETER - System detects the approriate bit resolution factor for ADS1015/ADS1115 ADC
-daysRunning           = 0.0000,      // SYSTEM PARAMETER - Stores the total number of days the MPPT device has been running since last powered
-Wh                    = 0.0000,      // SYSTEM PARAMETER - Stores the accumulated energy harvested (Watt-Hours)
-kWh                   = 0.0000,      // SYSTEM PARAMETER - Stores the accumulated energy harvested (Kiliowatt-Hours)
-MWh                   = 0.0000,      // SYSTEM PARAMETER - Stores the accumulated energy harvested (Megawatt-Hours)
+energy_wh             = 0.0000,      // SYSTEM PARAMETER - Stores the accumulated energy harvested (Watt-Hours)
 loopTime              = 0.0000,      // SYSTEM PARAMETER -
 outputDeviation       = 0.0000,      // SYSTEM PARAMETER - Output Voltage Deviation (%)
 buckEfficiency        = 0.0000,      // SYSTEM PARAMETER - Measure buck converter power conversion efficiency (only applicable to my dual current sensor version)
@@ -205,20 +181,13 @@ vOutSystemMin         = 0.0000;     //  CALIB PARAMETER -
 unsigned long 
 currentErrorMillis    = 0,           //SYSTEM PARAMETER -
 currentButtonMillis   = 0,           //SYSTEM PARAMETER -
-currentSerialMillis   = 0,           //SYSTEM PARAMETER -
 currentRoutineMillis  = 0,           //SYSTEM PARAMETER -
-currentLCDMillis      = 0,           //SYSTEM PARAMETER - 
-currentLCDBackLMillis = 0,           //SYSTEM PARAMETER - 
 currentWiFiMillis     = 0,           //SYSTEM PARAMETER - 
 currentMenuSetMillis  = 0,           //SYSTEM PARAMETER - 
 prevButtonMillis      = 0,           //SYSTEM PARAMETER -
-prevSerialMillis      = 0,           //SYSTEM PARAMETER -
 prevRoutineMillis     = 0,           //SYSTEM PARAMETER -
 prevErrorMillis       = 0,           //SYSTEM PARAMETER -
 prevWiFiMillis        = 0,           //SYSTEM PARAMETER -
-prevLCDMillis         = 0,           //SYSTEM PARAMETER -
-prevLCDBackLMillis    = 0,           //SYSTEM PARAMETER -
-timeOn                = 0,           //SYSTEM PARAMETER -
 loopTimeStart         = 0,           //SYSTEM PARAMETER - Used for the loop cycle stop watch, records the loop start time
 loopTimeEnd           = 0,           //SYSTEM PARAMETER - Used for the loop cycle stop watch, records the loop end time
 secondsElapsed        = 0;           //SYSTEM PARAMETER - 
@@ -232,7 +201,7 @@ void setup() {
   pinMode(buck_EN,OUTPUT);
   pinMode(LED,OUTPUT); 
   pinMode(FAN,OUTPUT);
-  pinMode(TS,INPUT); 
+  pinMode(TempSensor,INPUT); 
   pinMode(ADC_ALERT,INPUT);
   pinMode(buttonLeft,INPUT); 
   pinMode(buttonRight,INPUT); 
@@ -252,30 +221,29 @@ void setup() {
 
   //GPIO INITIALIZATION                          
   buck_disable();
-  
-  //INITIALIZE AND LIOAD FLASH MEMORY DATA
-  EEPROM.begin(512);
-  ESP_LOGD(TAG, "FLASH STORAGE INITIALIZED");
-  initializeFlashAutoload();   
-  ESP_LOGD(TAG, "FLASH STORAGE SAVEDD");
+
+  // connect to WiFi
+  WiFi.softAP(ssid, pass);
+  IPAddress IP = WiFi.softAPIP();
+  ESP_LOGI(TAG, "Started WiFi AP with SSID: %s and IP: %s", ssid, IP.toString().c_str());
 }
 
 void loop(void *ptr) {
   while(true){
-    ESP_LOGD(TAG, "LOOP");
-
     Read_Sensors();
     Device_Protection();
     System_Processes();
     Charging_Algorithm();    
-    Onboard_Telemetry();
     delay(100);
   }
 }
 
-
 extern "C" void app_main() {
     initArduino();
     setup();
+    
     xTaskCreate(loop, "loop", 8192, NULL, 10, NULL);
+    xTaskCreate(telemetry_task, "telemetry", 8192, NULL, 5, NULL);
+
+    start_webserver();
 }

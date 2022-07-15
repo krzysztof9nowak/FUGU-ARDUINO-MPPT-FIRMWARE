@@ -3,6 +3,10 @@
 #include <variables.h>
 #include <sensors.h>
 #include <charging_algorithm.h>
+#include <esp_log.h>
+
+static const char* TAG = "charging";
+
 
 void buck_enable(){                                                                  //Enable MPPT Buck Converter
   buck_enabled = 1;
@@ -37,33 +41,33 @@ void Charging_Algorithm(){
     if(REC==1){                                                                      //IUV RECOVERY - (Only active for charging mode)
       REC=0;                                                                         //Reset IUV recovery boolean identifier 
       buck_disable();                                                                //Disable buck before PPWM initialization
-      Serial.println("> Solar Panel Detected");                                      //Display serial message
-      Serial.print("> Computing For Predictive PWM ");                               //Display serial message 
-      for(int i = 0; i<40; i++){Serial.print(".");delay(30);}                        //For loop "loading... effect
-      Serial.println("");                                                            //Display a line break on serial for next lines  
+      ESP_LOGI(TAG, "Solar panel detected");
+      delay(1200);
+
       Read_Sensors();
       predictivePWM();
       PWM = PPWM; 
     }  
     else{                                                                            //NO ERROR PRESENT  - Continue power conversion              
+      int step_size = 10;
       /////////////////////// CC-CV BUCK PSU ALGORITHM ////////////////////////////// 
       if(MPPT_mode==0){                                                              //CC-CV PSU MODE
-        if(currentOutput>currentCharging)       {PWM--;}                             //Current Is Above → Decrease Duty Cycle
-        else if(voltageOutput>voltageBatteryMax){PWM--;}                             //Voltage Is Above → Decrease Duty Cycle   
-        else if(voltageOutput<voltageBatteryMax){PWM++;}                             //Increase duty cycle when output is below charging voltage (for CC-CV only mode)
+        if(currentOutput>currentCharging)       {PWM-=step_size;}                             //Current Is Above → Decrease Duty Cycle
+        else if(voltageOutput>voltageBatteryMax){PWM-=step_size;}                             //Voltage Is Above → Decrease Duty Cycle   
+        else if(voltageOutput<voltageBatteryMax){PWM+=step_size;}                             //Increase duty cycle when output is below charging voltage (for CC-CV only mode)
         else{}                                                                       //Do nothing when set output voltage is reached 
         PWM_Modulation();                                                            //Set PWM signal to Buck PWM GPIO       
       }     
         /////////////////////// MPPT & CC-CV CHARGING ALGORITHM ///////////////////////  
       else{                                                                                                                                                         
-        if(currentOutput>currentCharging){PWM--;}                                      //Current Is Above → Decrease Duty Cycle
-        else if(voltageOutput>voltageBatteryMax){PWM--;}                               //Voltage Is Above → Decrease Duty Cycle   
+        if(currentOutput>currentCharging){PWM-=step_size;}                                      //Current Is Above → Decrease Duty Cycle
+        else if(voltageOutput>voltageBatteryMax){PWM-=step_size;}                               //Voltage Is Above → Decrease Duty Cycle   
         else{                                                                          //MPPT ALGORITHM
-          if(powerInput>powerInputPrev && voltageInput>voltageInputPrev)     {PWM--;}  //  ↑P ↑V ; →MPP  //D--
-          else if(powerInput>powerInputPrev && voltageInput<voltageInputPrev){PWM++;}  //  ↑P ↓V ; MPP←  //D++
-          else if(powerInput<powerInputPrev && voltageInput>voltageInputPrev){PWM++;}  //  ↓P ↑V ; MPP→  //D++
-          else if(powerInput<powerInputPrev && voltageInput<voltageInputPrev){PWM--;}  //  ↓P ↓V ; ←MPP  //D--
-          else if(voltageOutput<voltageBatteryMax)                           {PWM++;}  //  MP MV ; MPP Reached - 
+          if(powerInput>powerInputPrev && voltageInput>voltageInputPrev)     {PWM-=step_size;}  //  ↑P ↑V ; →MPP  //D--
+          else if(powerInput>powerInputPrev && voltageInput<voltageInputPrev){PWM+=step_size;}  //  ↑P ↓V ; MPP←  //D++
+          else if(powerInput<powerInputPrev && voltageInput>voltageInputPrev){PWM+=step_size;}  //  ↓P ↑V ; MPP→  //D++
+          else if(powerInput<powerInputPrev && voltageInput<voltageInputPrev){PWM-=step_size;}  //  ↓P ↓V ; ←MPP  //D--
+          else if(voltageOutput<voltageBatteryMax)                           {PWM+=step_size;}  //  MP MV ; MPP Reached - 
           powerInputPrev   = powerInput;                                               //Store Previous Recorded Power
           voltageInputPrev = voltageInput;                                             //Store Previous Recorded Voltage        
         }   

@@ -1,3 +1,3 @@
 #pragma once
 
-void Onboard_Telemetry();
+void telemetry_task(void *ptr);

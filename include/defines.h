@@ -1,10 +1,5 @@
 #pragma once
 
-//====================================== USER PARAMETERS ===========================================//
-// The parameters below are the default parameters used when the MPPT charger settings have not     //
-// been set or saved through the LCD menu interface or mobile phone WiFi app. Some parameters here  //
-// would allow you to override or unlock features for advanced users (settings not on the LCD menu) //
-//==================================================================================================//
 #define backflow_MOSFET 27          //SYSTEM PARAMETER - Backflow MOSFET
 #define buck_IN         33          //SYSTEM PARAMETER - Buck MOSFET Driver PWM Pin
 #define buck_EN         32          //SYSTEM PARAMETER - Buck MOSFET Driver Enable Pin
