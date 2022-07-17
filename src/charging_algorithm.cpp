@@ -47,7 +47,7 @@ void Charging_Algorithm(){
       PWM = PPWM;
     }  
     else{                                                                            //NO ERROR PRESENT  - Continue power conversion              
-      int step_size = 10;
+      int step_size = 1;
       /////////////////////// CC-CV BUCK PSU ALGORITHM ////////////////////////////// 
       if(MPPT_mode==0){                                                              //CC-CV PSU MODE
         if(currentOutput>currentCharging)       {PWM-=step_size;}                             //Current Is Above → Decrease Duty Cycle

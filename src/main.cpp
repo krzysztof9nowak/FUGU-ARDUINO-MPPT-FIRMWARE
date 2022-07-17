@@ -37,11 +37,6 @@ Adafruit_ADS1115 ads;             //SYSTEM PARAMETER  - ADS1115 ADC Library (By:
 #define buttonBack      19          //SYSTEM PARAMETER - 
 #define buttonSelect    23          //SYSTEM PARAMETER -
 
-//========================================= WiFi SSID ==============================================//
-// This MPPT firmware uses the Blynk phone app and arduino library for controls and data telemetry  //
-// Fill in your WiFi SSID and password. You will also have to get your own authentication token     //
-// from email after registering from the Blynk platform.                                            //
-//==================================================================================================//
 char 
 ssid[] = "kN",                   //   USER PARAMETER - Enter Your WiFi SSID
 pass[] = "12345678";               //   USER PARAMETER - Enter Your WiFi Password
@@ -71,14 +66,9 @@ backlightSleepMode      = 0;           //  USER PARAMETER - 0 = Never, 1 = 10sec
 float 
 voltageBatteryMax       = 14.1,     //   USER PARAMETER - Maximum Battery Charging Voltage (Output V)
 voltageBatteryMin       = 11.0,     //   USER PARAMETER - Minimum Battery Charging Voltage (Output V)
-currentCharging         = 10;     //   USER PARAMETER - Maximum Charging Current (A - Output)
+currentCharging         = 5;     //   USER PARAMETER - Maximum Charging Current (A - Output)
 
 
-//================================== CALIBRATION PARAMETERS =======================================//
-// The parameters below can be tweaked for designing your own MPPT charge controllers. Only modify //
-// the values below if you know what you are doing. The values below have been pre-calibrated for  //
-// MPPT charge controllers designed by TechBuilder (Angelo S. Casimiro)                            //
-//=================================================================================================//
 int
 ADC_GainSelect          = 2,          //  CALIB PARAMETER - ADC Gain Selection (0→±6.144V 3mV/bit, 1→±4.096V 2mV/bit, 2→±2.048V 1mV/bit)
 avgCountVS              = 3,          //  CALIB PARAMETER - Voltage Sensor Average Sampling Count (Recommended: 3)
@@ -92,20 +82,15 @@ cOutSystemMax           = 10,    //  CALIB PARAMETER -
 ntcResistance           = 10000.00,   //  CALIB PARAMETER - NTC temp sensor's resistance. Change to 10000.00 if you are using a 10k NTC
 voltageDropout          = 1.0000,     //  CALIB PARAMETER - Buck regulator's dropout voltage (DOV is present due to Max Duty Cycle Limit)
 voltageBatteryThresh    = 1.5000,     //  CALIB PARAMETER - Power cuts-off when this voltage is reached (Output V)
-currentInAbsolute       = 10.0,    //  CALIB PARAMETER - Maximum Input Current The System Can Handle (A - Input)
-currentOutAbsolute      = 10.0,    //  CALIB PARAMETER - Maximum Output Current The System Can Handle (A - Input)
+currentInAbsolute       = 12.0,    //  CALIB PARAMETER - Maximum Input Current The System Can Handle (A - Input)
+currentOutAbsolute      = 12.0,    //  CALIB PARAMETER - Maximum Output Current The System Can Handle (A - Input)
 PPWM_margin             = 99.5000,    //  CALIB PARAMETER - Minimum Operating Duty Cycle for Predictive PWM (%)
 PWM_MaxDC               = 97.0000,    //  CALIB PARAMETER - Maximum Operating Duty Cycle (%) 90%-97% is good
 efficiencyRate          = 1.0000,     //  CALIB PARAMETER - Theroretical Buck Efficiency (% decimal)
 currentMidPoint         = 2.5250,     //  CALIB PARAMETER - Current Sensor Midpoint (V)
 currentSensV            = 0.0660,     //  CALIB PARAMETER - Current Sensor Sensitivity (mV/A)
-vInSystemMin            = 12.000;     //  CALIB PARAMETER - 
+vInSystemMin            = 10.000;     //  CALIB PARAMETER - 
 
-//===================================== SYSTEM PARAMETERS =========================================//
-// Do not change parameter values in this section. The values below are variables used by system   //
-// processes. Changing the values can damage the MPPT hardware. Kindly leave it as is! However,    //
-// you can access these variables to acquire data needed for your mods.                            //
-//=================================================================================================//
 bool
 buck_enabled            = 0,           // SYSTEM PARAMETER - Buck Enable Status
 fan_enabled             = 0,           // SYSTEM PARAMETER - Fan activity status (1 = On, 0 = Off)
@@ -226,7 +211,7 @@ void loop(void *ptr) {
     err = safety_checks();
     System_Processes();
     Charging_Algorithm();    
-    delay(100);
+    delay(30);
   }
 }
 

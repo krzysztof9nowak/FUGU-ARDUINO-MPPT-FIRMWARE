@@ -52,6 +52,7 @@ void telemetry_task(void *) {
       SSHOW_FLOAT("CI", currentInput, 2);
       SSHOW_FLOAT("CO", currentOutput, 2);
       printf("\n");
+      SHOW_INT((int)err);
       SSHOW_FLOAT("Wh", energy_wh, 2);
       SSHOW_INT("temp", temperature);
       SSHOW_INT("EN", buck_enabled);
